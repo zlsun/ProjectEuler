@@ -1,3 +1,4 @@
+#-*- encoding: utf-8 -*-
 """
 Sum square difference
 
@@ -9,5 +10,9 @@ Hence the difference between the sum of the squares of the first ten natural num
 Find the difference between the sum of the squares of the first one hundred natural numbers and the square of the sum.
 """
 
+from utils import *
 
-# 
+N = 100
+r = range(1, N + 1)
+print sum(r) ** 2 - sum(map(square, r))
+# 25164150

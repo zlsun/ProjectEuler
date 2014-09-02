@@ -6,5 +6,8 @@ Find the sum of all the primes below two million.
 
 """
 
+from utils import *
 
-# 
+N = 2000000
+print sum(get_primes(N))
+# 142913828922

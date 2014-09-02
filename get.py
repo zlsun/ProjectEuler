@@ -18,15 +18,16 @@ def get_info(i):
 
 def save(i):
     name = "%03d.py" % i
-    if exists(name):
-        print name, "exist"
-        return
+    # if exists(name):
+    #     print name, "exist"
+    #     return
     f = file(name, "w")
     info = get_info(i)
-    f.write('#-*- encoding: utf-8 -*-')
+    f.write('#-*- encoding: utf-8 -*-\n')
     f.write('"""\n')
     f.write(info)
     f.write('"""\n')
+    f.write('\nfrom utils import *\n')
     f.write('\n\n# \n')
     f.close()
     print name, "saved"
@@ -35,4 +36,8 @@ def save(i):
 def save_all(i, j):
     map(save, range(i, j + 1))
 
-save_all(1, 10)
+
+N = 10
+last = int(file('last.txt').read())
+save_all(last + 1, last + N)
+file('last.txt', 'w').write(str(last + N))
