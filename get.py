@@ -23,12 +23,17 @@ def save(i):
     #     return
     f = file(name, "w")
     info = get_info(i)
-    f.write('#-*- encoding: utf-8 -*-\n')
-    f.write('"""\n')
-    f.write(info)
-    f.write('"""\n')
-    f.write('\nfrom utils import *\n')
-    f.write('\n\n# \n')
+    f.write(
+'''\
+#-*- encoding: utf-8 -*-
+"""
+%s"""
+
+from utils import *
+
+
+# 
+''' % info)
     f.close()
     print name, "saved"
 

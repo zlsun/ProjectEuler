@@ -1,13 +1,16 @@
 
 import operator
 from copy import deepcopy
-from itertools import islice
 from math import *
+from itertools import *
+from collections import defaultdict
 from lru_cache import lru_cache
+from lazy import *
 
 
 def cache(func):
     pool = {}
+
     def wrapper(*args):
         if args in pool:
             return pool[args]
@@ -17,78 +20,77 @@ def cache(func):
     return wrapper
 
 
+def groupcount(sq):
+    ''' Accept a sequence sq, and count its elements by group '''
+    d = defaultdict(int)  # default 0
+    for each in sq:
+        d[each] += 1
+    return dict(d)
+
+
+def fnchain(x, fs):
+    for f in fs:
+        x = f(x)
+    return x
+
+
 def is_prime(n):
-    for i in xrange(2, int(n ** 0.5) + 1):
-        if n % i:
-            return False
-    return True
+    if n < 5:
+        return n == 2 or n == 3
+    return n % 2 and n % 3 and \
+        all(n % (6 * k - 1) and n % (6 * k + 1)
+            for k in range(1, int((n ** .5 + 1) / 6) + 1))
 
 
-def get_primes_map(n):
+@lazylist
+def sieve(n):
+    n = int(n)
     n += 1
-    isprime = get_primes_map.isprime
+    isprime = sieve.isprime
     olen = len(isprime)
     if olen < n:
         isprime.extend([True] * max(olen / 2, n - olen))
         # print olen, len(isprime), n
-        for i in xrange(2, n):
+        for i in xrange(2, int(n ** 0.5) + 1):
             if isprime[i]:
                 for j in xrange(max(i * 2, (olen / i + 1) * i), n, i):
                     isprime[j] = False
     return islice(isprime, n)
-get_primes_map.isprime = [False, False]
+sieve.isprime = [False, False]
 
 
-def get_primes(n):
-    """ get primes <= n """
-    return [i for i, e in enumerate(get_primes_map(n)) if e]
+@lazylist
+def primes(n):
+    ''' Generate primes <= n '''
+    return (i for i, e in enumerate(sieve(n)) if e)
 
 
+@lazylist
 def factors(n):
-    L = []
-    for p in get_primes(n):
-        while n % p == 0:
-            L.append(p)
-            n /= p
-        if n == 1:
-            break
-    return L
+    ''' Generate all prime factors of n '''
+    f = 2
+    while f * f <= n:
+        while not n % f:
+            yield f
+            n /= f
+        f += 1
+    if n > 1:
+        yield n
 
 divisors = lambda n: [i for i in range(1, n + 1) if n % i == 0]
 
 
 def divisors_num(n):
     """
-    n = product(p[n]^v[n])
-    d(n) = sum(v[n])
+    n = a^x*b^y*...*c^z
+    d(n) = (x+1)*(y+1)*...*(z+1)
     """
-    r = 1
-    l = len(divisors_num.primes)
-    # if n > 598 then
-    # (n/log(n))*(1 + 0.992/log(n)) < pi(n) < (n/log(n))*(1 + 1.2762/log(n))
-    # The upper bound holds for all n > 1. This gives a tight bound for larger n.
-    # Note n/log(n) < pi(n) for n > 10.
-    if n > 1 and n ** 0.5 > l: #(n / log(n)) * (1 + 1.2762 / log(n)) > l:
-        divisors_num.primes = get_primes(n)
-    for p in divisors_num.primes:
-        v = 0
-        while n % p == 0:
-            v += 1
-            n /= p
-        r *= (v + 1)
-        if n == 1:
-            break
-    return r
-divisors_num.primes = []
+    return product(x + 1 for x in groupcount(factors(n)).values())
 
 
-def is_palindromic(n):
-    s = str(n)
-    l = len(s)
-    for i in range(l / 2):
-        if s[i] != s[l - i - 1]:
-            return False
-    return True
+def is_palindromic(s):
+    # ~0 == -1, ~1 == -2
+    return all(s[i] == s[~i] for i in range(len(s) / 2))
 
 
 def gcd(a, b):
@@ -136,33 +138,27 @@ class Matrix(object):
         except IndexError:
             pass
 
+    def __iter__(self):
+        def iter():
+            for i in self.data:
+                yield i
+        return iter()
+
     def __str__(self):
-        m = len(str(max(sum(self.data, []))))
+        m = fnchain(self.data, [flatten, max, str, len])
         return '\n'.join(' '.join(('%%%dd' % m) % i for i in r) for r in self.data)
 
     def __add__(self, other):
-        new = Matrix(self.row, self.col)
-        for i in self.indexs():
-            new[i] = self[i] + other[i]
-        return new
+        return Matrix(self.row, self.col).apply2(other, operator.add)
 
     def __sub__(self, other):
-        new = Matrix(self.row, self.col)
-        for i in self.indexs():
-            new[i] = self[i] - other[i]
-        return new
+        return Matrix(self.row, self.col).apply2(other, operator.sub)
 
     def __mul__(self, other):
-        new = Matrix(self.row, self.col)
-        for i in self.indexs():
-            new[i] = self[i] * other[i]
-        return new
+        return Matrix(self.row, self.col).apply2(other, operator.mul)
 
     def __div__(self, other):
-        new = Matrix(self.row, self.col)
-        for i in self.indexs():
-            new[i] = self[i] / other[i]
-        return new
+        return Matrix(self.row, self.col).apply2(other, operator.div)
 
     def indexs(self):
         for i in range(self.row):
@@ -172,6 +168,12 @@ class Matrix(object):
     def apply(self, f):
         for i in self.indexs():
             self[i] = f(self[i])
+        return self
+
+    def apply2(self, other, f):
+        for i in self.indexs():
+            self[i] = f(self[i], other[i])
+        return self
 
     def move(self, *args):
         if len(args) == 2:
@@ -180,11 +182,10 @@ class Matrix(object):
             v = args[0]
         new = Matrix(self.row, self.col)
         for i in self.indexs():
-            ni = v[0] + i[0]
-            nj = v[1] + i[1]
-            if ni < 0 or nj < 0:
+            ni = v[0] + i[0], v[1] + i[1]
+            if any(x < 0 for x in ni):
                 continue
-            new[ni, nj] = self[i]
+            new[ni] = self[i]
         return new
 
 dire4 = [(0, -1), (0, 1), (-1, 0), (1, 0)]
@@ -192,16 +193,18 @@ dire8 = dire4 + [(-1, -1), (1, -1), (-1, 1), (1, 1)]
 
 if __name__ == '__main__':
     print is_prime(2), is_prime(3), is_prime(4)
-    print list(get_primes_map(10))
-    print get_primes(2), get_primes(20)
+    print sieve(10)
+    print primes(2), primes(20)
     print factors(8)
-    print divisors(8)
+    print divisors(8), divisors(220)
     print divisors_num(13), divisors_num(8)
-    print is_palindromic(101), is_palindromic(110)
+    print is_palindromic('101'), is_palindromic('110')
     print product(range(1, 4))
     print gcd(2, 8)
     print lcm(2, 3)
     print factorial(4)
     print square(4)
-    print Matrix([[11, 2], [3, 4]]).move(1, 1)
-    print Matrix([[11, 2], [3, 4]]).move(-1, -1)
+    m = Matrix([[1, 2], [3, 4]])
+    print '-'.join(map(str, m))
+    print m.move(1, 1)
+    print m.move(-1, -1)
