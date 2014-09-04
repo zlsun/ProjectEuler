@@ -11,5 +11,18 @@ Find the sum of all the positive integers which cannot be written as the sum of 
 
 from utils import *
 
+N = 28123
+is_abundant = [False] + [divisors_sum(i) > 2 * i for i in range(1, N + 1)]
+abundants = [i for i, e in enumerate(is_abundant) if e]
 
-# 
+
+def ok(n):
+    for i in abundants:
+        if i > n:
+            break
+        if is_abundant[n - i]:
+            return False
+    return True
+
+print sum(filter(ok, range(1, N + 1)))
+# 4179871

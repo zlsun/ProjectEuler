@@ -1,11 +1,26 @@
 
 import operator
+import fn
 from copy import deepcopy
 from math import *
 from itertools import *
 from collections import defaultdict
 from lru_cache import lru_cache
 from lazy import *
+
+level = 0
+
+
+def log(func):
+    def wrapper(*args):
+        global level
+        print "Log: %s%s(%s)" % (' ' * level, func.__name__, ', '.join(map(str, args)))
+        level += 1
+        result = func(*args)
+        level -= 1
+        print "Log: %s-> %s" % (' ' * level, result)
+        return result
+    return wrapper
 
 
 def cache(func):
@@ -32,6 +47,19 @@ def fnchain(x, fs):
     for f in fs:
         x = f(x)
     return x
+
+
+@lazylist
+def fib(n=None):
+    a, b = 1, 1
+    if n == None:
+        while True:
+            yield a
+            b, a = a + b, b
+    else:
+        while a <= n:
+            yield a
+            b, a = a + b, b
 
 
 def is_prime(n):
@@ -70,22 +98,50 @@ def factors(n):
     ''' Generate all prime factors of n '''
     f = 2
     while f * f <= n:
+        v = 0
         while not n % f:
-            yield f
+            v += 1
             n /= f
+        yield f, v
         f += 1
     if n > 1:
-        yield n
+        yield n, 1
 
-divisors = lambda n: [i for i in range(1, n + 1) if n % i == 0]
+
+@lazylist
+def divisors(n):
+    for i in xrange(1, n / 2 + 1):
+        if n % i == 0:
+            yield i
+    yield n
 
 
 def divisors_num(n):
     """
-    n = a^x*b^y*...*c^z
-    d(n) = (x+1)*(y+1)*...*(z+1)
+    n = a^x * b^y * ... * c^z
+    divisors_num(n) = (x+1)*(y+1)*...*(z+1)
+    See: http://en.wikipedia.org/wiki/Divisor
     """
-    return product(x + 1 for x in groupcount(factors(n)).values())
+    return product(p + 1 for _, p in factors(n))
+
+
+def divisors_sum(n):
+    """
+    n = a^x * b^y * ... * c^z
+    divisors_sum(n) = (a^(x+1)-1)/(a-1) * ...
+    See: http://en.wikipedia.org/wiki/Divisor_function
+    """
+    return product(x + 1 if p == 1 else ((x ** (p + 1) - 1) / (x - 1)) for x, p in factors(n))
+
+
+@lazylist
+def permutations(string):
+    if len(string) == 1:
+        yield string
+    else:
+        for i in xrange(len(string)):
+            for perm in permutations(string[:i] + string[i + 1:]):
+                yield string[i] + perm
 
 
 def is_palindromic(s):
@@ -105,6 +161,11 @@ factorial = lambda n: product(xrange(1, n + 1))
 square = lambda n: n * n
 flatten = lambda m: sum(m, [])
 transpose = lambda m: map(list, zip(*transpose))
+
+vadd = lambda a, b: [i + j for i, j in zip(a, b)]
+vsub = lambda a, b: [i - j for i, j in zip(a, b)]
+vmul = lambda v, i: [e * i for e in v]
+vdiv = lambda v, i: [e / i for e in v]
 
 
 class Matrix(object):
@@ -129,14 +190,11 @@ class Matrix(object):
             pass
 
     def __setitem__(self, i, value):
-        try:
-            if type(i) == int:
-                self.data[i] = value
-            elif type(i) == tuple:
-                r, c = i
-                self.data[r][c] = value
-        except IndexError:
-            pass
+        if isinstance(i, int):
+            self.data[i] = value
+        elif isinstance(i, (tuple, list)):
+            r, c = i
+            self.data[r][c] = value
 
     def __iter__(self):
         def iter():
@@ -149,16 +207,19 @@ class Matrix(object):
         return '\n'.join(' '.join(('%%%dd' % m) % i for i in r) for r in self.data)
 
     def __add__(self, other):
-        return Matrix(self.row, self.col).apply2(other, operator.add)
+        return Matrix(self.data).apply2(other, operator.add)
 
     def __sub__(self, other):
-        return Matrix(self.row, self.col).apply2(other, operator.sub)
+        return Matrix(self.data).apply2(other, operator.sub)
 
     def __mul__(self, other):
-        return Matrix(self.row, self.col).apply2(other, operator.mul)
+        return Matrix(self.data).apply2(other, operator.mul)
 
     def __div__(self, other):
-        return Matrix(self.row, self.col).apply2(other, operator.div)
+        return Matrix(self.data).apply2(other, operator.div)
+
+    def size(self):
+        return (self.row, self.col)
 
     def indexs(self):
         for i in range(self.row):
@@ -182,8 +243,8 @@ class Matrix(object):
             v = args[0]
         new = Matrix(self.row, self.col)
         for i in self.indexs():
-            ni = v[0] + i[0], v[1] + i[1]
-            if any(x < 0 for x in ni):
+            ni = vadd(i, v)
+            if any(x < 0 for x in ni) or any(x >= y for x, y in zip(ni, self.size())):
                 continue
             new[ni] = self[i]
         return new
@@ -196,8 +257,9 @@ if __name__ == '__main__':
     print sieve(10)
     print primes(2), primes(20)
     print factors(8)
-    print divisors(8), divisors(220)
-    print divisors_num(13), divisors_num(8)
+    print divisors(0), divisors(1), divisors(8), divisors(220), divisors(72)
+    print divisors_num(0), divisors_num(1), divisors_num(13), divisors_num(8), divisors_num(72)
+    print divisors_sum(0), divisors_sum(1), divisors_sum(13), divisors_sum(8), divisors_sum(72)
     print is_palindromic('101'), is_palindromic('110')
     print product(range(1, 4))
     print gcd(2, 8)
@@ -208,3 +270,4 @@ if __name__ == '__main__':
     print '-'.join(map(str, m))
     print m.move(1, 1)
     print m.move(-1, -1)
+    print m * m

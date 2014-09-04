@@ -9,5 +9,5 @@ What is the largest prime factor of the number 600851475143 ?
 from utils import *
 
 N = 600851475143
-print factors(N)[::-1][0]
+print factors(N)[::-1][0][0]
 # 6857

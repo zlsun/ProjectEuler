@@ -7,12 +7,8 @@ By considering the terms in the Fibonacci sequence whose values do not exceed fo
 
 """
 
+from utils import *
+
 N = 4000000
-s = 0
-a, b = 1, 1
-while b <= N:
-    b, a = a + b, b
-    if b % 2 == 0:
-        s += b
-print s
+print sum(i for i in fib(N) if i % 2 == 0)
 # 4613732

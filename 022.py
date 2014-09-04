@@ -9,5 +9,8 @@ What is the total of all the name scores in the file?
 
 from utils import *
 
-
-# 
+names = eval("[%s]" % open('022_names.txt').read())
+names.sort()
+print sum((i + 1) * sum(ord(c) - ord('A') + 1 for c in name)
+          for i, name in enumerate(names))
+# 871198282

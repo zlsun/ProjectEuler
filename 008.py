@@ -54,9 +54,5 @@ N = """
 from utils import *
 
 l = len(N)
-m = 0
-for i in range(l - 13):
-    p = product(map(int, N[i:i + 13]))
-    m = max(m, p)
-print m
+print max(product(map(int, N[i:i + 13])) for i in range(l - 13))
 # 23514624000
