@@ -12,8 +12,16 @@ Find the first four consecutive integers to have four distinct prime factors. Wh
 """
 
 from utils import *
+from collections import deque
 
+N = 4
 i = 1
-while 1:
-    len(factors())
-# 
+d = deque([0] * N)
+while i < 200000:
+    d.append(len(factors(i)))
+    d.popleft()
+    if all(j == N for j in d):
+        print i - N + 1
+        break
+    i += 1
+# 134043

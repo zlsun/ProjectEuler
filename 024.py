@@ -10,5 +10,5 @@ What is the millionth lexicographic permutation of the digits 0, 1, 2, 3, 4, 5, 
 from utils import *
 
 
-print permutations("0123456789")[1000000 - 1]
+print ''.join(permutations("0123456789")[1000000 - 1])
 # 2783915460

@@ -8,5 +8,5 @@ What is the 10 001st prime number?
 from utils import *
 
 N = 10001
-print get_primes(N * 100)[N - 1]
+print primes(N * 100)[N - 1]
 # 104743

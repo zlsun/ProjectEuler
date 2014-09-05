@@ -4,34 +4,34 @@ import fn
 from copy import deepcopy
 from math import *
 from itertools import *
+from functools import *
 from collections import defaultdict
 from lru_cache import lru_cache
 from lazy import *
 
-level = 0
 
-
-def log(func):
-    def wrapper(*args):
-        global level
-        print "Log: %s%s(%s)" % (' ' * level, func.__name__, ', '.join(map(str, args)))
-        level += 1
+def trace(func):
+    def wrapper(*args, **kwds):
+        print "Log: %s%s(%s)" % (' ' * trace.level, func.__name__,
+                                 ', '.join(map(str, args) + ('%s=%s' % i for i in kwds.items())))
+        trace.level += 1
         result = func(*args)
-        level -= 1
-        print "Log: %s-> %s" % (' ' * level, result)
+        trace.level -= 1
+        print "Log: %s-> %s" % (' ' * trace.level, result)
         return result
     return wrapper
+trace.level = 0
 
 
 def cache(func):
-    pool = {}
+    cached = {}
 
     def wrapper(*args):
-        if args in pool:
-            return pool[args]
+        if args in cached:
+            return cached[args]
         else:
-            pool[args] = func(*args)
-            return pool[args]
+            cached[args] = func(*args)
+            return cached[args]
     return wrapper
 
 
@@ -88,6 +88,7 @@ sieve.isprime = [False, False]
 
 
 @lazylist
+@cache
 def primes(n):
     ''' Generate primes <= n '''
     return (i for i, e in enumerate(sieve(n)) if e)
@@ -102,7 +103,8 @@ def factors(n):
         while not n % f:
             v += 1
             n /= f
-        yield f, v
+        if v:
+            yield f, v
         f += 1
     if n > 1:
         yield n, 1
@@ -134,16 +136,6 @@ def divisors_sum(n):
     return product(x + 1 if p == 1 else ((x ** (p + 1) - 1) / (x - 1)) for x, p in factors(n))
 
 
-@lazylist
-def permutations(string):
-    if len(string) == 1:
-        yield string
-    else:
-        for i in xrange(len(string)):
-            for perm in permutations(string[:i] + string[i + 1:]):
-                yield string[i] + perm
-
-
 def is_palindromic(s):
     # ~0 == -1, ~1 == -2
     return all(s[i] == s[~i] for i in range(len(s) / 2))
@@ -154,18 +146,19 @@ def gcd(a, b):
         b, a = a % b, b
     return a
 
+permutations = lazylist(permutations)
 
 lcm = lambda a, b: a / gcd(a, b) * b
 product = lambda L, init=1: reduce(operator.mul, L, init)
 factorial = lambda n: product(xrange(1, n + 1))
 square = lambda n: n * n
 flatten = lambda m: sum(m, [])
-transpose = lambda m: map(list, zip(*transpose))
+transpose = lambda m: map(list, zip(*m))
 
-vadd = lambda a, b: [i + j for i, j in zip(a, b)]
-vsub = lambda a, b: [i - j for i, j in zip(a, b)]
-vmul = lambda v, i: [e * i for e in v]
-vdiv = lambda v, i: [e / i for e in v]
+vadd = lambda a, b: tuple(i + j for i, j in zip(a, b))
+vsub = lambda a, b: tuple(i - j for i, j in zip(a, b))
+vmul = lambda v, i: tuple(e * i for e in v)
+vdiv = lambda v, i: tuple(e / i for e in v)
 
 
 class Matrix(object):
@@ -179,21 +172,21 @@ class Matrix(object):
             self.row, self.col = args
             self.data = [[0] * self.col for _ in range(self.row)]
 
-    def __getitem__(self, i):
+    def __getitem__(self, idx):
         try:
-            if type(i) == int:
-                return self.data[i]
-            elif type(i) == tuple:
-                r, c = i
+            if type(idx) == int:
+                return self.data[idx]
+            elif type(idx) == tuple:
+                r, c = idx
                 return self.data[r][c]
         except IndexError:
             pass
 
-    def __setitem__(self, i, value):
-        if isinstance(i, int):
-            self.data[i] = value
-        elif isinstance(i, (tuple, list)):
-            r, c = i
+    def __setitem__(self, idx, value):
+        if isinstance(idx, int):
+            self.data[idx] = value
+        elif isinstance(idx, (tuple, list)):
+            r, c = idx
             self.data[r][c] = value
 
     def __iter__(self):
@@ -237,20 +230,21 @@ class Matrix(object):
         return self
 
     def move(self, *args):
-        if len(args) == 2:
-            v = args
-        else:
-            v = args[0]
+        v = args[0] if len(args) == 1 else args
         new = Matrix(self.row, self.col)
         for i in self.indexs():
             ni = vadd(i, v)
-            if any(x < 0 for x in ni) or any(x >= y for x, y in zip(ni, self.size())):
+            if any(x < 0 or x >= y for x, y in zip(ni, self.size())):
                 continue
             new[ni] = self[i]
         return new
 
-dire4 = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-dire8 = dire4 + [(-1, -1), (1, -1), (-1, 1), (1, 1)]
+    def transpose(self):
+        return Matrix(transpose(self))
+
+
+dire4 = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+dire8 = [(0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1)]
 
 if __name__ == '__main__':
     print is_prime(2), is_prime(3), is_prime(4)
@@ -261,6 +255,7 @@ if __name__ == '__main__':
     print divisors_num(0), divisors_num(1), divisors_num(13), divisors_num(8), divisors_num(72)
     print divisors_sum(0), divisors_sum(1), divisors_sum(13), divisors_sum(8), divisors_sum(72)
     print is_palindromic('101'), is_palindromic('110')
+    print permutations('012')
     print product(range(1, 4))
     print gcd(2, 8)
     print lcm(2, 3)
@@ -270,4 +265,5 @@ if __name__ == '__main__':
     print '-'.join(map(str, m))
     print m.move(1, 1)
     print m.move(-1, -1)
-    print m * m
+    print (m * m).transpose()
+    print flatten(m)

@@ -11,5 +11,15 @@ How many different ways can £2 be made using any number of coins?
 
 from utils import *
 
+ps = [200, 100, 50, 20, 10, 5, 2, 1]
 
-# 
+def calc(remind, ps,a=1):
+    if len(ps) == 1:
+        return remind % ps[0] == 0
+    s = 0
+    for i in range(remind / ps[0] + 1):
+        s += calc(remind - ps[0] * i, ps[1:])
+    return s
+
+print calc(200, ps)
+# 73682

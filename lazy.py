@@ -65,6 +65,10 @@ class LazyList(object):
             ellipsis = False
         return '[%s%s]' % (', '.join(map(str, self.l)), '...' * ellipsis)
 
+    def __len__(self):
+        self.l.extend(self.g)
+        return len(self.l)
+
 
 def lazylist(g):
     '''lazylist decorator.

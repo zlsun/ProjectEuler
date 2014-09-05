@@ -16,5 +16,14 @@ Find the product of the coefficients, a and b, for the quadratic expression that
 
 from utils import *
 
-
-# 
+m = 0
+for a in range(-1000, 1000):
+    for b in range(-1000, 1000):
+        n = 0
+        while is_prime((n + a) * n + b):
+            n += 1
+        if n > m:
+            m = n
+            p = a * b
+print p
+# -59231

@@ -11,4 +11,9 @@ Using words.txt (right click and 'Save Link/Target As...'), a 16K text file cont
 from utils import *
 
 
-# 
+triangle = lambda n: (lambda s: s * (s + 1) == n * 2)(int((n * 2) ** 0.5))
+words = eval("[%s]" % file('042_words.txt').read())
+values = (sum(ord(c) - ord('A') + 1 for c in w) for w in words)
+triwords = filter(triangle, values)
+print len(triwords)
+# 162
