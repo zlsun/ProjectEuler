@@ -63,7 +63,7 @@ class LazyList(object):
             ellipsis = True
         except StopIteration:
             ellipsis = False
-        return '[%s%s]' % (', '.join(map(str, self.l)), '...' * ellipsis)
+        return '[%s%s]' % (', '.join(map(repr, self.l)), '...' * ellipsis)
 
     def __len__(self):
         self.l.extend(self.g)

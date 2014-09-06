@@ -13,7 +13,7 @@ from lazy import *
 def trace(func):
     def wrapper(*args, **kwds):
         print "Log: %s%s(%s)" % (' ' * trace.level, func.__name__,
-                                 ', '.join(map(str, args) + ('%s=%s' % i for i in kwds.items())))
+                                 ', '.join(map(str, args) + ['%s=%s' % i for i in kwds.items()]))
         trace.level += 1
         result = func(*args)
         trace.level -= 1
@@ -146,7 +146,15 @@ def gcd(a, b):
         b, a = a % b, b
     return a
 
-permutations = lazylist(permutations)
+
+@lazylist
+def circular(s):
+    return (s[i:] + s[:i] for i in range(len(s)))
+
+t2s = lambda t: ''.join(t)
+t2i = lambda t: int(t2s(t))
+# permutations = lazylist(permutations)
+combinations = lazylist(combinations)
 
 lcm = lambda a, b: a / gcd(a, b) * b
 product = lambda L, init=1: reduce(operator.mul, L, init)
@@ -256,6 +264,7 @@ if __name__ == '__main__':
     print divisors_sum(0), divisors_sum(1), divisors_sum(13), divisors_sum(8), divisors_sum(72)
     print is_palindromic('101'), is_palindromic('110')
     print permutations('012')
+    print circular('197')
     print product(range(1, 4))
     print gcd(2, 8)
     print lcm(2, 3)
@@ -265,5 +274,5 @@ if __name__ == '__main__':
     print '-'.join(map(str, m))
     print m.move(1, 1)
     print m.move(-1, -1)
-    print (m * m).transpose()
+    print(m * m).transpose()
     print flatten(m)

@@ -9,5 +9,6 @@ Note: as 1! = 1 and 2! = 2 are not sums they are not included.
 
 from utils import *
 
-
-# 
+is_curious = lambda n: sum(map(factorial, map(int, str(n)))) == n
+print sum(filter(is_curious, xrange(3, 50000)))
+# 40730

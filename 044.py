@@ -10,5 +10,9 @@ Find the pair of pentagonal numbers, Pj and Pk, for which their sum and differen
 
 from utils import *
 
-
-# 
+pentagonal = lambda n: n * (3 * n - 1) / 2
+is_pentagonal = lambda n: (lambda s: s * (3 * s - 1) == n * 2)(
+    int((n * 2.0 / 3) ** 0.5) + 1)
+ps = set(pentagonal(n) for n in range(1, 3000))
+print min(p1 - p2 for p1 in ps for p2 in ps if p1 + p2 in ps and p1 - p2 in ps)
+# 5482660

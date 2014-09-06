@@ -9,5 +9,5 @@ Find the sum of all numbers, less than one million, which are palindromic in bas
 
 from utils import *
 
-
-# 
+print sum(i for i in xrange(1,1000000) if is_palindromic(str(i)) and is_palindromic(bin(i)[2:]))
+# 872187

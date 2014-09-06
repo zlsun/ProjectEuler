@@ -12,7 +12,7 @@ Evaluate the sum of all the amicable numbers under 10000.
 from utils import *
 
 N = 10000
-L = N +1
+L = N + 1
 s = 0
 m = [0] + [divisors_sum(i) - i for i in range(1, N + 1)]
 for i in xrange(1, L):

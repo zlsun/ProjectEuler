@@ -9,5 +9,11 @@ NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
 
 from utils import *
 
-
-# 
+N = 1000000
+s = sieve(N)
+print sum(p for p in primes(N) if p > 10 and all(s[int(i)]
+            for i in (lambda s:
+                flatten([s[:i], s[i:]] for i in range(1, len(s)))
+            )(str(p))
+         ))
+# 748317

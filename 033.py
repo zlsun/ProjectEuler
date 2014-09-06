@@ -8,7 +8,18 @@ There are exactly four non-trivial examples of this type of fraction, less than 
 If the product of these four fractions is given in its lowest common terms, find the value of the denominator.
 """
 
+from __future__ import division
 from utils import *
 
-
-# 
+ii, jj = 1, 1
+for i in range(10, 99):
+    for j in range(10, 99):
+        i1, i2 = divmod(i, 10)
+        j1, j2 = divmod(j, 10)
+        if j2 == 0:
+            continue
+        if i1 != i2 and i2 == j1 and i / j == i1 / j2:
+            ii *= i
+            jj *= j
+print int(jj / gcd(ii, jj))
+# 100

@@ -11,5 +11,10 @@ d1 × d10 × d100 × d1000 × d10000 × d100000 × d1000000
 
 from utils import *
 
-
-# 
+s = "0"
+i = 1
+while len(s) <= 1000000:
+    s += str(i)
+    i += 1
+print product(int(s[10 ** i]) for i in range(7))
+# 210

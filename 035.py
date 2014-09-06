@@ -9,5 +9,6 @@ How many circular primes are there below one million?
 
 from utils import *
 
-
-# 
+circular_prime = lambda p: all(is_prime(int(i)) for i in circular(str(p)))
+print len(filter(circular_prime, primes(1000000)))
+# 55

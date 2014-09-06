@@ -10,5 +10,21 @@ HINT: Some products can be obtained in more than one way so be sure to only incl
 
 from utils import *
 
+# version 1
+# s = set()
+# for p in permutations('123456789'):
+#     for i in range(1, 5):
+#         for j in range(i + 1, 7):
+#             if t2i(p[:i]) * t2i(p[i:j]) == t2i(p[j:]):
+#                 s.add(t2i(p[j:]))
+# print sum(s)
 
-# 
+# version 2
+pandigital = set()
+for i in range(1, 10000):
+    for j in range(i, int(10000/i)+1):
+        if ''.join(sorted(list(str(i) + str(j) + str(i*j)))) == '123456789':
+            pandigital.add(i*j)
+print sum(pandigital)
+
+# 45228
