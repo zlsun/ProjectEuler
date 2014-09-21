@@ -12,4 +12,27 @@ Your task has been made easy, as the encryption key consists of three lower case
 from utils import *
 
 
-# 
+a = ord('a')
+z = ord('z')
+
+
+def decrypt(nums, key):
+    kl = len(key)
+    for i, c in enumerate(nums):
+        yield c ^ key[i % kl]
+
+
+def gen_key():
+    for i in range(a, z + 1):
+        for j in range(a, z + 1):
+            for k in range(a, z + 1):
+                yield i, j, k
+
+nums = eval('[%s]' % file('./059_cipher.txt').read())
+for k in gen_key():
+    de = list(decrypt(nums, k))
+    s = ''.join(map(chr, de))
+    if s.find(' and ') != -1:
+        print s
+        print sum(de)
+# 107359
