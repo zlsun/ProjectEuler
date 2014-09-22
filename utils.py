@@ -162,6 +162,7 @@ factorial = lambda n: product(xrange(1, n + 1))
 square = lambda n: n * n
 flatten = lambda m: sum(m, [])
 transpose = lambda m: map(list, zip(*m))
+digits = lambda n: map(int, str(n))
 
 vadd = lambda a, b: tuple(i + j for i, j in zip(a, b))
 vsub = lambda a, b: tuple(i - j for i, j in zip(a, b))
