@@ -2,6 +2,7 @@
 from requests import get
 from bs4 import BeautifulSoup as BS
 from os.path import exists
+from multiprocessing import Pool
 
 url = "https://www.projecteuler.net/problem=%d"
 
@@ -39,10 +40,12 @@ from utils import *
 
 
 def save_all(i, j):
-    map(save, range(i, j + 1))
+    p = Pool()
+    p.map(save, range(i, j + 1))
 
 
-N = 10
-last = int(file('last.txt').read())
-save_all(last + 1, last + N)
-file('last.txt', 'w').write(str(last + N))
+if __name__ == '__main__':
+    N = 10
+    last = int(file('last.txt').read())
+    save_all(last + 1, last + N)
+    file('last.txt', 'w').write(str(last + N))
