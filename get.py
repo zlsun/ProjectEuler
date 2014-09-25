@@ -3,11 +3,11 @@ from requests import get
 from bs4 import BeautifulSoup as BS
 from os.path import exists
 
-url = "http://projecteuler.net/problem=%d"
+url = "https://www.projecteuler.net/problem=%d"
 
 
 def get_info(i):
-    soup = BS(get(url % i).content)
+    soup = BS(get(url % i, verify=False).content)
     problem = soup.find(id="content")
     title = problem.h2.string
     content = problem.find(class_="problem_content").get_text()
