@@ -18,5 +18,16 @@ How many chains, with a starting number below one million, contain exactly sixty
 
 from utils import *
 
+sum_of_factorial = lambda n: sum(map(factorial, digits(n)))
 
-# 
+@no_loop_cache(0)
+def get_chain(n):
+    s = sum_of_factorial(n)
+    if s == n:
+        return 0
+    else:
+        return get_chain(s) + 1
+
+print len(filter(lambda x: x == 60, map(get_chain, xrange(10 ** 6))))
+
+# 402

@@ -14,5 +14,16 @@ How many different ways can one hundred be written as a sum of at least two posi
 
 from utils import *
 
+@cache
+def solve(n, m):
+    if n < 0:
+        return 0
+    if n == 0:
+        return 1
+    s = 0
+    for i in range(1, m + 1):
+        s += solve(n - i, min(i, m))
+    return s
 
-# 
+print solve(100, 99)
+# 190569291

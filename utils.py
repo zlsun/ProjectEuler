@@ -12,12 +12,13 @@ from lazy import *
 
 def trace(func):
     def wrapper(*args, **kwds):
-        print "Log: %s%s(%s)" % (' ' * trace.level, func.__name__,
+        indent = ' ' * trace.level
+        print "Log: %s%s(%s)" % (indent, func.__name__,
                                  ', '.join(map(str, args) + ['%s=%s' % i for i in kwds.items()]))
         trace.level += 1
         result = func(*args)
         trace.level -= 1
-        print "Log: %s-> %s" % (' ' * trace.level, result)
+        print "Log: %s-> %s" % (indent, result)
         return result
     return wrapper
 trace.level = 0
@@ -33,6 +34,23 @@ def cache(func):
             cached[args] = func(*args)
             return cached[args]
     return wrapper
+
+
+def no_loop_cache(n):
+    def cache(func):
+        cached = {}
+
+        def wrapper(*args):
+            if args in cached:
+                if cached[args] == None:
+                    cached[args] = 0
+                return cached[args]
+            else:
+                cached[args] = None
+                cached[args] = func(*args)
+                return cached[args]
+        return wrapper
+    return cache
 
 
 def groupcount(sq):
@@ -153,12 +171,14 @@ def circular(s):
 
 t2s = lambda t: ''.join(t)
 t2i = lambda t: int(t2s(t))
-# permutations = lazylist(permutations)
+permutations = lazylist(permutations)
 combinations = lazylist(combinations)
 
 lcm = lambda a, b: a / gcd(a, b) * b
 product = lambda L, init=1: reduce(operator.mul, L, init)
 factorial = lambda n: product(xrange(1, n + 1))
+P = lambda n, m: factorial(n) / factorial(n - m)
+C = lambda n, m: P(n, m) / factorial(m)
 square = lambda n: n * n
 flatten = lambda m: sum(m, [])
 transpose = lambda m: map(list, zip(*m))

@@ -11,5 +11,6 @@ By listing the set of reduced proper fractions for d ≤ 1,000,000 in ascending 
 
 from utils import *
 
+print min(((d * 3 / 7, d) for d in range(1, 10 ** 6) if d % 7 != 0), key=lambda (n, d): 3. / 7 - n * 1. / d)[0]
 
-# 
+# 428570
