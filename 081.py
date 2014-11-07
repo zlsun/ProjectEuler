@@ -29,4 +29,18 @@ Find the minimal path sum, in matrix.txt (right click and "Save Link/Target As..
 
 from utils import *
 
-# 
+M = [map(int, l.split(',')) for l in file('./081_matrix.txt')]
+L = len(M)
+
+DP = [[0] * L for _ in range(L)]
+
+for i in range(L):
+    DP[0][i] = sum(M[0][:i + 1])
+    DP[i][0] = sum(transpose(M)[0][:i])
+for i in range(1, L):
+    for j in range(1, L):
+        DP[i][j] = min(DP[i - 1][j], DP[i][j - 1]) + M[i][j]
+
+print DP[-1][-1]
+
+# 427337
