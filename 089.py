@@ -48,7 +48,7 @@ def from_roman(s):
     l = len(s)
     while i < l:
         c = s[i]
-        if c in sp.keys() and i + 1 < l and s[i + 1] in sp[c]:
+        if c in sp and i + 1 < l and s[i + 1] in sp[c]:
             r += c2i[s[i + 1]] - c2i[c]
             i += 1
         else:

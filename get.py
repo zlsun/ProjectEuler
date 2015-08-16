@@ -33,7 +33,7 @@ def save(i):
 from utils import *
 
 
-# 
+#
 ''' % info)
     f.close()
     print name, "saved"
@@ -49,3 +49,4 @@ if __name__ == '__main__':
     last = int(file('last.txt').read())
     save_all(last + 1, last + N)
     file('last.txt', 'w').write(str(last + N))
+

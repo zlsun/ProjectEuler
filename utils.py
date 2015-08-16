@@ -61,9 +61,7 @@ def groupcount(sq):
 
 
 def fnchain(x, fs):
-    for f in fs:
-        x = f(x)
-    return x
+    return reduce(lambda x, f: f(x), fs, x)
 
 
 @lazylist
