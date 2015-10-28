@@ -292,5 +292,5 @@ if __name__ == '__main__':
     print '-'.join(map(str, m))
     print m.move(1, 1)
     print m.move(-1, -1)
-    print(m * m).transpose()
+    print (m * m).transpose()
     print flatten(m)
